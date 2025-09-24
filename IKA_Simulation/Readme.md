@@ -1,0 +1,1 @@
+Bu klasör Gazebo, ROS, microROS gibi yapıların ve kullanılan uzantıların neler olduğunu kısaca açıklayan ve sistemi anlamamıza yardımcı olması için oluşturulmuştur.
