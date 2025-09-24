@@ -1,7 +1,5 @@
 Burada, Stm ile Gazebo arasındaki bağlantıyı sağlayan script yapısı var.
 
-Simulasyon_Tanıtımı.docx ile genel ROS2, microROS ve Gazebo nun yapıları ve işleveleri anlatılıyor.
-
 husky_ws klasörü ise tüm yapının colcon build edilmiş hali olarak var. Gerekli kurulumlar sağlandıktan sonra çalıştırılabilir
 
 Bunun için :
