@@ -1,3 +1,4 @@
+Python Scriptleri, kamera
 Bu python scriptlerini çalıştırmak için 'ros2_ws/src/topic_relay' olarak bir dizin oluşturuyor ve buraya kaydediyoruz.
 
    cd ros2_ws/src/topic_relay
