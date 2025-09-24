@@ -1,0 +1,132 @@
+/// URDF dosyasını Rviz de açma***************************
+ros2 launch urdf_tutorial display.launch.py model:=/home/abdullah/learn_ros2_ws/src/my_first_pkg/urdf/car.urdf
+**********************************************************
+
+//HUSKY yi Gazeboda böyle, bu sırada başlat*****************************
+cd husky_ws/
+source install/setup.bash
+ros2 launch husky_gazebo husky_playpen.launch.py
+(Sistemde kontrolcüler doğru yüklenmezse arkada çalışan bir yapı vardır, onu kapatmak gerekir,Gerekli olabilecek kodlardan killall 'killall gzserver, killall gzclient, killall -11 ros2' ları yazınız)
+****************************************************************
+
+/// Bilgisayar Klavyeden simulasyon ortamında yönetim*************
+ros2 run teleop_twist_keyboard teleop_twist_keyboard --ros-args -r cmd_vel:=/husky_velocity_controller/cmd_vel_unstamped (İle klavyeyi yükle)
+
+İleri Gitmek İçin: i
+Geri Gitmek İçin: ,
+Sola Dönmek İçin: j
+Sağa Dönmek İçin: l
+Durmak İçin: k
+Hızları Ayarlamak İçin:
+Lineer Hızı Artır: q
+Lineer Hızı Azalt: z
+Açısal Hızı Artır: e
+Açısal Hızı Azalt: c
+
+ros2 run teleop_twist_keyboard teleop_twist_keyboard --ros-args -r cmd_vel:=/joy_teleop/cmd_vel(İle gözle)
+
+ros2 topic echo /husky_velocity_controller/cmd_vel_unstamped
+********************************************************************
+
+/// Gerekli olabilecek kodlar***********************************
+killall gzserver
+killall gzclient
+killall -11 ros2
+source install/setup.bash
+colcon build --packages-select husky_control husky_base(colcon build --packages-select husky_control husky_base --allow-overriding husky_control husky_base)
+rm -rf build/ install/ log/
+ros2 run husky_bringup install(şifre istenecek)//gerekli olmayabilir
+****************************************************************
+
+/// HUSKY Rviz dosyasını böyle başlat**************************
+cd husky_ws/
+source install/setup.bash
+ros2 launch husky_viz view_model.launch.py
+**************************************************************
+
+/// Dışarıdan terminale yazacağın kodlarla direkt kontrol*****************
+ros2 topic pub --once /husky_velocity_controller/cmd_vel_unstamped geometry_msgs/msg/Twist '{linear: {x: 1.0, y: 0.0, z: 0.0}, angular: {x: 0.0, y: 0.0, z: 0.0}}'
+
+dairesel için ^Cabdullah@abdullah-G5-5500:~/husky_ws$ ros2 topic pub /cmd_vel geometry_msgs/Twist "{
+  linear: { x: -0.3, y: 0.0, z: 0.0 },
+  angular: { x: 0.0, y: 0.0, z: 5.0 }
+}" --rate 10
+**************************************************************************
+
+/// Verileri Alma İşlemleri *******************************
+ros2 topic list  , ile alabileceğin işlemlere bakabiliyorsun
+/imu/data_raw  , ile imu ve lineer acceleration başta olmak üzere birçok veriyi alıyor
+/gps_plugin/vel  , ile gps verisini alıyor
+bunlar için ros2 topic echo /gps_plugin/vel yazmalısın
+************************************************************ 
+
+/// STM32 ile Gazebo arasında bağlantının kurulması**************************
+ros2 topic echo /imu/data_raw , ile gazebodaki veriyi okuyabiliyorum.
+ros2 topic echo /micro_ros_imu , ile kendi stm32 kodumda oluşturduğum subscribe ı okuyabiliyorum.
+ros2 /cmd_vel ile veri yayınlayabiliyorum
+cd ros2_ws/src/topic_relay
+python3 topic_relay.py , imu verisini direkt stm32 ye atmak için yazdığım script i çalıştırıyorum. Yani "/imu/data_raw" yı "/micro_ros_imu" ya yönlendiriyor.
+
+source /opt/ros/humble/setup.bash , ihtiyaca göre kullanılabilir
+*****************************************************************************
+
+/// STM32 yi USB üzerinden haberleşmesi üzerine bağlıyoruz**************
+source /opt/ros/humble/setup.bash
+source /home/abdullah/microros_ws/install/local_setup.bash
+sudo chown abdullah /dev/ttyUSB0
+ros2 run micro_ros_agent micro_ros_agent serial --dev /dev/ttyUSB0
+************************************************************************
+
+/// KURULUMUN NASIL YAPILDIĞI****************************
+1) Gazeboyu başlatın
+2) STM32 yi subscriber olarak hazırla ve başlat
+3) Gazebodan verileri alın (ros2 topic echo /imu/data_raw ve ros2 topic echo /gps/data)
+4) STM32 subscriber yapısını gözetleyin (ros2 topic echo /micro_ros_imu)
+5) STM32 debug ile başlatın sonra resetleyin ve Python script ini çalıştırın
+*********************************************************
+
+/// SJTU_Drone yapılandırması*****************************************
+ros2 launch urdf_tutorial display.launch.py model:=/home/abdullah/husky_ws/src/sjtu_drone/sjtu_drone_description/urdf/sjtu_drone.urdf , ile urdf formatı yüklüyoruz.
+
+cd husky_ws/src/sjtu_drone ve sudo bash run_docker.sh ile izni veriyoruz, kendi yüklüyor. Hem Gazebo hem Rviz dosyası ile birlikte klavye kontrolü. Bu Docker ile çalıştırmayı sağlıyor.
+
+cd husky_ws , ile source kodunun bulunduğu yapıya gidiyoruz
+ros2 launch husky_gazebo husky_playpen.launch.py , ile husky ortamını ve kodunu başlatıyoruz.
+ros2 launch sjtu_drone_bringup sjtu_drone_bringup.launch.py , ile sjtu_drone'u bu yapıya aktarıyoruz. 
+
+/// Doronu terminalden harekete geçirme***************************
+
+ros2 topic pub /simple_drone/takeoff std_msgs/msg/Empty "{}" , ile dronu kaldırıyoruz.
+
+ros2 topic pub /simple_drone/cmd_vel geometry_msgs/msg/Twist "{linear: {x: 0.0, y: 0.0, z: -0.5}, angular: {x: 0.0, y: 0.0, z: 0.0}}"
+
+ros2 topic pub /simple_drone/land std_msgs/msg/Empty "{}" , ile dronu indiriyoruz.
+
+************************************************************
+
+/// KURULUMUN NASIL YAPILDIĞI_2****************************
+1) STM32 nin USB port bağlantısını ve subscriber,publisher yapısını ayarla
+(önce killall -11 ros2 ) ile başla
+source /opt/ros/humble/setup.bash
+source /home/abdullah/microros_ws/install/local_setup.bash
+sudo chown abdullah /dev/ttyUSB0
+ros2 run micro_ros_agent micro_ros_agent serial --dev /dev/ttyUSB0
+2) cd husky_ws
+3) ros2 launch husky_gazebo husky_playpen.launch.py
+4) ros2 launch sjtu_drone_bringup sjtu_drone_bringup.launch.py
+5) cd ros2_ws/src/topic_relay
+   python3 topic_relay.py
+   python3 camera_bottom.py
+   
+
+ros2 control list_controllers ile kontrol edilebilir.
+*********************************************************
+
+ros2 control list_controllers , ile kontrolcü durumları kontrol ediliyor
+
+abdullah@abdullah-G5-5500:~$ ros2 topic info /simple_drone/cmd_vel   , bu yapı ile echo bilgisi alınıyor
+Type: geometry_msgs/msg/Twist
+Publisher count: 1
+Subscription count: 1
+
+

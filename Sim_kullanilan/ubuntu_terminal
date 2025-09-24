@@ -1,0 +1,43 @@
+source /home/abdullah/microros_ws/install/local_setup.bash // micro ros un konumu
+
+/// STM32 yi USB üzerinden haberleşmesi üzerine bağlıyoruz**************
+source /opt/ros/humble/setup.bash
+source /home/abdullah/microros_ws/install/local_setup.bash
+sudo chown abdullah /dev/ttyUSB0
+ros2 run micro_ros_agent micro_ros_agent serial --dev /dev/ttyUSB0
+************************************************************************
+
+/// Yayınlanan veriyi alma kısmı ***************************
+source /opt/ros/humble/setup.bash
+ros2 topic list
+ros2 topic echo /cubemx_publisher 
+************************************************************
+
+/// UART doğrumu diye kontrol için yapılan kısım*****************
+abdullah@abdullah-G5-5500:~$ source /opt/ros/humble/setup.bash
+ros2 run demo_nodes_cpp talker  // ile rosout u açıyoruz
+diğer terminale ros2 topic list ve ros2 topic echo /rosout
+**************************************************************
+
+/// URDF formatı Rviz de açma**************************
+ros2 launch urdf_tutorial display.launch.py model:=/home/abdullah/learn_ros2_ws/src/my_first_pkg/urdf/car.urdf
+********************************************************
+ 
+//HUSKY yi böyle, bu sırada başlat*****************************
+cd husky_ws/
+source install/setup.bash
+ros2 run husky_bringup install(şifre istenecek)
+ros2 launch husky_gazebo husky_playpen.launch.py
+ve sistem başlıyor
+
+ls /dev/ttyUSB*   tüm USB bağlantılarını listele
+
+biryerde roslaunch diyorsa bu ROS1 içindir yan eski. Yenisinde ROS2 launch denir
+Biz bridge için ROS 2 Humble ve Ignition Garden kurduk
+
+/// xacro dosyasını urdf e çevirme ve onu da flowchart olarak gösterme*************
+~/husky_ws/src/husky/husky_description/urdf$ source ~/husky_ws/install/setup.bash
+ros2 run xacro xacro husky.urdf.xacro -o husky.urdf
+
+-abdullah@abdullah-G5-5500:~/learn_ros2_ws/src/my_first_pkg/urdf$ urdf_to_graphiz my_car.urdf
+***********************************************************************************

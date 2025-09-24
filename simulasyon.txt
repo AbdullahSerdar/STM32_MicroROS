@@ -1,0 +1,42 @@
+//HUSKY yi Gazeboda böyle, bu sırada başlat*****************************
+cd husky_ws/
+source install/setup.bash
+ros2 launch husky_gazebo husky_playpen.launch.py
+(Sistemde kontrolcüler doğru yüklenmezse arkada çalışan bir yapı vardır, onu kapatmak gerekir,Gerekli olabilecek kodlardan killall 'killall gzserver, killall gzclient, killall -11 ros2' ları yazınız)
+****************************************************************
+
+/// Bilgisayar Klavyeden simulasyon ortamında yönetim*************
+ros2 run teleop_twist_keyboard teleop_twist_keyboard --ros-args -r cmd_vel:=/husky_velocity_controller/cmd_vel_unstamped
+******************************************************************
+
+/// Sistemin Build i ********************************************
+Bu build işlemi ilk defa yapacaklar için birçok defa sorun çıkaracaktır çünki ilgili doysalar yüklü olmayacaktır. Her hatadan sonra gerekli olan yapıyı yükleyiniz.
+Sistemde build gerektirecek herhangi bir işlemde ilgili dosya satırı açılır ve
+rm -rf build/ install/ log/  (ile tüm build dosyaları silinir)
+source /opt/ros/humble/setup.bash
+ export CMAKE_PREFIX_PATH=/opt/ros/humble:$CMAKE_PREFIX_PATH
+colcon build (ile dosyanın build i yapılır)
+colcon build --packages-select husky_control husky_base (ile sadece belirli bir yapının buildi yapılır)
+
+/// HUSKY Rviz dosyasını böyle başlat**************************
+cd husky_ws/
+source install/setup.bash
+ros2 launch husky_viz view_model.launch.py
+**************************************************************
+
+/// Verileri Alma İşlemleri *******************************
+ros2 topic list  , ile alabileceğin işlemlere bakabiliyorsun (tüm topicleri listeliyor)
+ros2 topic echo /gps_plugin/vel (ile ilgili yapıların verileri alınıyor)
+************************************************************ 
+
+/// STM32 yi USB üzerinden haberleşmesi üzerine bağlıyoruz**************
+source /opt/ros/humble/setup.bash
+source /home/abdullah/microros_ws/install/local_setup.bash
+sudo chown abdullah /dev/ttyUSB0
+ros2 run micro_ros_agent micro_ros_agent serial --dev /dev/ttyUSB0
+- Yukarıdaki yapı ile USB ayarı yapılıyor
+************************************************************************
+
+/// STM32 de kodu yüklemeden önce terminale bunu yaz **************
+sudo chmod 666 /var/run/docker.sock
+********************************************************************
