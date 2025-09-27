@@ -1,4 +1,4 @@
-Python Scriptleri, Gazebo ortamında Kameraları açmak ve basit bir görüntü işleme yapısı oluşturmak ve Gazebo ile STM32
+Python Scriptleri, Gazebo ortamında Kameraları açmak, basit bir görüntü işleme yapısı oluşturmak ve Gazebo ile STM32
 arasındaki veri akışını sağlayacak olan topicleri içerir.
 
 Bu python scriptlerini çalıştırmak için 'ros2_ws/src/topic_relay' olarak bir dizin oluşturuyor ve buraya kaydediyoruz.
